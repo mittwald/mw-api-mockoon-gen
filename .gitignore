@@ -2,3 +2,4 @@ node_modules/
 openapi_prepared/
 overlays/
 mockoon_envs/
+package-lock.json
