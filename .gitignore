@@ -1,0 +1,4 @@
+node_modules/
+openapi_prepared/
+overlays/
+mockoon_envs/

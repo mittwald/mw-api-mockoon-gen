@@ -1,0 +1,19 @@
+{
+  "name": "mockoon-toolchain-ts",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Build a Mockoon environment from OpenAPI using Node/TypeScript tooling only",
+  "scripts": {
+    "build:mockoon": "bash ./build-mockoon-env.sh",
+    "gen:filter-overlay": "tsx ./scripts/generate-filter-overlay.ts",
+    "gen:unroll-overlay": "tsx ./scripts/generate-unroll-overlay.ts",
+    "patch:mockoon": "tsx ./scripts/patch-mockoon-env.ts"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-cli": "^4.0.4",
+    "@mockoon/cli": "^9.1.0",
+    "oas-patch": "^0.2.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
+  }
+}
