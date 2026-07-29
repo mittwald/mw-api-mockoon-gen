@@ -2,8 +2,6 @@
 set -euo pipefail
 
 OPENAPI_URL="${OPENAPI_URL:-https://api.mittwald.de/v2/openapi.json}"
-ALLOWED_TAGS="${ALLOWED_TAGS:-}"
-ESSENTIAL_TAGS="${ESSENTIAL_TAGS:-User}"
 
 OPENAPI_DIR="${OPENAPI_DIR:-openapi_prepared}"
 OVERLAYS_DIR="${OVERLAYS_DIR:-overlays}"
@@ -26,10 +24,7 @@ curl --location --fail --silent "${OPENAPI_URL}" > "${RAW_SPEC}"
 echo "2/8 Generate filter overlay"
 npx tsx ./scripts/generate-filter-overlay.ts \
   --input "${RAW_SPEC}" \
-  --output "${FILTER_OVERLAY}" \
-  --tags "${ALLOWED_TAGS}" \
-  --essential-tags "${ESSENTIAL_TAGS}" \
-  --title "Overlay: Remove deprecated and unwanted operations"
+  --output "${FILTER_OVERLAY}"
 
 echo "3/8 Apply filter overlay"
 npx bump overlay "${RAW_SPEC}" "${FILTER_OVERLAY}" > "${FILTERED_SPEC}"

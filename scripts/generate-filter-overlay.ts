@@ -9,10 +9,6 @@ function getArg(flag: string, fallback = ""): string {
   return idx >= 0 && idx + 1 < process.argv.length ? process.argv[idx + 1] : fallback;
 }
 
-function parseCsv(input: string): Set<string> {
-  return new Set(input.split(",").map((value) => value.trim()).filter(Boolean));
-}
-
 function toPathSelector(pathValue: string, method?: string): string {
   return method ? `$.paths['${pathValue}'].${method}` : `$.paths['${pathValue}']`;
 }
@@ -25,22 +21,13 @@ function isDeprecated(op: JsonObject): boolean {
   return op.deprecated === true;
 }
 
-function matchesTags(op: JsonObject, allowedTags: Set<string>, essentialTags: Set<string>): boolean {
-  const rawTags = op.tags;
-  const tags = Array.isArray(rawTags) ? rawTags.filter((value): value is string => typeof value === "string") : [];
-  return tags.some((tag) => allowedTags.has(tag) || essentialTags.has(tag));
-}
-
 function main() {
   const input = getArg("--input");
   const output = getArg("--output");
-  const title = getArg("--title", "Overlay: Remove deprecated and unwanted operations");
-  const allowedTags = parseCsv(getArg("--tags", ""));
-  const essentialTags = parseCsv(getArg("--essential-tags", "User"));
-  const tagFilterActive = allowedTags.size > 0;
+  const title = "Overlay: Remove deprecated operations";
 
   if (!input || !output) {
-    console.error("Usage: tsx generate-filter-overlay.ts --input in.json --output out.overlay.json [--tags A,B] [--essential-tags User]");
+    console.error("Usage: tsx generate-filter-overlay.ts --input in.json --output out.overlay.json");
     process.exit(1);
   }
 
@@ -62,11 +49,6 @@ function main() {
       }
 
       if (isDeprecated(operation)) {
-        removedOps.push(toPathSelector(pathValue, method));
-        continue;
-      }
-
-      if (tagFilterActive && !matchesTags(operation, allowedTags, essentialTags)) {
         removedOps.push(toPathSelector(pathValue, method));
       }
     }
@@ -102,7 +84,7 @@ function main() {
     ...removedOps.map((target) => ({
       target,
       remove: true,
-      description: "Removed operation: deprecated or does not match tag filter"
+      description: "Removed deprecated operation"
     })),
     ...removedPaths.map((target) => ({
       target,
@@ -116,7 +98,7 @@ function main() {
     info: {
       title,
       version: "1.0.0",
-      description: "Removes deprecated operations and optionally non-matching tag operations, then removes empty paths."
+      description: "Removes deprecated operations, then removes empty paths."
     },
     actions
   };
