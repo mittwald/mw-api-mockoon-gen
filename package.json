@@ -12,7 +12,7 @@
   "devDependencies": {
     "@apidevtools/swagger-cli": "^4.0.4",
     "@mockoon/cli": "^9.1.0",
-    "oas-patch": "^0.2.3",
+    "bump-cli": "^2.10.1",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2"
   }

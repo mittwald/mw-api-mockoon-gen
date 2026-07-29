@@ -6,7 +6,7 @@ Node/TypeScript-only pipeline to build a working Mockoon environment from raw Op
 
 1. Downloads OpenAPI JSON.
 2. Generates overlay to remove deprecated operations (and optionally non-matching tags).
-3. Applies filter overlay using oas-patch.
+3. Applies filter overlay using bump-cli.
 4. Generates recursion-unroll overlay for self-referencing schemas.
 5. Applies unroll overlay.
 6. Dereferences the resulting OpenAPI using swagger-cli.

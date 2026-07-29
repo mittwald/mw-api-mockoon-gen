@@ -32,7 +32,7 @@ npx tsx ./scripts/generate-filter-overlay.ts \
   --title "Overlay: Remove deprecated and unwanted operations"
 
 echo "3/8 Apply filter overlay"
-npx oas-patch overlay "${RAW_SPEC}" "${FILTER_OVERLAY}" -o "${FILTERED_SPEC}"
+npx bump overlay "${RAW_SPEC}" "${FILTER_OVERLAY}" > "${FILTERED_SPEC}"
 
 echo "4/8 Generate recursion unroll overlay"
 npx tsx ./scripts/generate-unroll-overlay.ts \
@@ -41,7 +41,7 @@ npx tsx ./scripts/generate-unroll-overlay.ts \
   --title "Unroll Recursion Overlay"
 
 echo "5/8 Apply recursion overlay"
-npx oas-patch overlay "${FILTERED_SPEC}" "${UNROLL_OVERLAY}" -o "${UNROLLED_SPEC}"
+npx bump overlay "${FILTERED_SPEC}" "${UNROLL_OVERLAY}" > "${UNROLLED_SPEC}"
 
 echo "6/8 Dereference OpenAPI"
 npx swagger-cli bundle "${UNROLLED_SPEC}" --outfile "${DEREF_SPEC}" --dereference
