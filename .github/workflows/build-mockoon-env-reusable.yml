@@ -1,0 +1,171 @@
+name: Build Mockoon Environment (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      openapi_url:
+        description: Source URL of OpenAPI JSON
+        required: false
+        type: string
+        default: https://api.mittwald.de/v2/openapi.json
+      allowed_tags:
+        description: Comma-separated tags to keep (empty = no tag filtering)
+        required: false
+        type: string
+        default: ""
+      essential_tags:
+        description: Comma-separated tags always kept unless deprecated
+        required: false
+        type: string
+        default: User
+      openapi_dir:
+        description: Folder for OpenAPI intermediate artifacts
+        required: false
+        type: string
+        default: openapi_prepared
+      overlays_dir:
+        description: Folder for generated overlays
+        required: false
+        type: string
+        default: overlays
+      mockoon_dir:
+        description: Folder for generated Mockoon env files
+        required: false
+        type: string
+        default: mockoon_envs
+      node_version:
+        description: Node.js version used for the pipeline
+        required: false
+        type: string
+        default: "22"
+      upload_artifact:
+        description: Upload generated Mockoon environment as workflow artifact
+        required: false
+        type: boolean
+        default: true
+      artifact_name:
+        description: Artifact name for generated Mockoon environment
+        required: false
+        type: string
+        default: mockoon-env-patched
+    outputs:
+      mockoon_env_patched:
+        description: Relative path to generated patched Mockoon environment
+        value: ${{ jobs.build.outputs.mockoon_env_patched }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Mockoon environment
+    runs-on: ubuntu-latest
+    outputs:
+      mockoon_env_patched: ${{ steps.paths.outputs.mockoon_env_patched }}
+    env:
+      OPENAPI_URL: ${{ inputs.openapi_url }}
+      ALLOWED_TAGS: ${{ inputs.allowed_tags }}
+      ESSENTIAL_TAGS: ${{ inputs.essential_tags }}
+      OPENAPI_DIR: ${{ inputs.openapi_dir }}
+      OVERLAYS_DIR: ${{ inputs.overlays_dir }}
+      MOCKOON_DIR: ${{ inputs.mockoon_dir }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve output paths
+        id: paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "raw_spec=${OPENAPI_DIR}/openapi.json" >> "$GITHUB_OUTPUT"
+          echo "filter_overlay=${OVERLAYS_DIR}/filter_deprecated.overlay.json" >> "$GITHUB_OUTPUT"
+          echo "filtered_spec=${OPENAPI_DIR}/openapi.filtered.json" >> "$GITHUB_OUTPUT"
+          echo "unroll_overlay=${OVERLAYS_DIR}/unroll_recursion.overlay.json" >> "$GITHUB_OUTPUT"
+          echo "unrolled_spec=${OPENAPI_DIR}/openapi.unrolled.json" >> "$GITHUB_OUTPUT"
+          echo "deref_spec=${OPENAPI_DIR}/openapi.deref.json" >> "$GITHUB_OUTPUT"
+          echo "mockoon_env_raw=${MOCKOON_DIR}/mockoon_env.json" >> "$GITHUB_OUTPUT"
+          echo "mockoon_env_patched=${MOCKOON_DIR}/mockoon-env-patched.json" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure output directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OPENAPI_DIR" "$OVERLAYS_DIR" "$MOCKOON_DIR"
+
+      - name: 1/8 Fetch OpenAPI
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --location --fail --silent "$OPENAPI_URL" > "${{ steps.paths.outputs.raw_spec }}"
+
+      - name: 2/8 Generate filter overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx ./scripts/generate-filter-overlay.ts \
+            --input "${{ steps.paths.outputs.raw_spec }}" \
+            --output "${{ steps.paths.outputs.filter_overlay }}"
+
+      - name: 3/8 Apply filter overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx bump overlay "${{ steps.paths.outputs.raw_spec }}" "${{ steps.paths.outputs.filter_overlay }}" > "${{ steps.paths.outputs.filtered_spec }}"
+
+      - name: 4/8 Generate recursion unroll overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx ./scripts/generate-unroll-overlay.ts \
+            --input "${{ steps.paths.outputs.filtered_spec }}" \
+            --output "${{ steps.paths.outputs.unroll_overlay }}" \
+            --title "Unroll Recursion Overlay"
+
+      - name: 5/8 Apply recursion overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx bump overlay "${{ steps.paths.outputs.filtered_spec }}" "${{ steps.paths.outputs.unroll_overlay }}" > "${{ steps.paths.outputs.unrolled_spec }}"
+
+      - name: 6/8 Dereference OpenAPI
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx swagger-cli bundle "${{ steps.paths.outputs.unrolled_spec }}" --outfile "${{ steps.paths.outputs.deref_spec }}" --dereference
+
+      - name: 7/8 Import into Mockoon
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx mockoon-cli import --input "${{ steps.paths.outputs.deref_spec }}" --output "${{ steps.paths.outputs.mockoon_env_raw }}" --prettify
+
+      - name: 8/8 Patch Mockoon template quirks
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx ./scripts/patch-mockoon-env.ts --input "${{ steps.paths.outputs.mockoon_env_raw }}" --output "${{ steps.paths.outputs.mockoon_env_patched }}"
+
+      - name: Upload patched Mockoon environment
+        if: ${{ inputs.upload_artifact }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: |
+            ${{ steps.paths.outputs.mockoon_env_patched }}
+            ${{ steps.paths.outputs.mockoon_env_raw }}
+            ${{ steps.paths.outputs.deref_spec }}
+            ${{ steps.paths.outputs.unrolled_spec }}
+            ${{ steps.paths.outputs.filtered_spec }}
+            ${{ steps.paths.outputs.filter_overlay }}
+            ${{ steps.paths.outputs.unroll_overlay }}

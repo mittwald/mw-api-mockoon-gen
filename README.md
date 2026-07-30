@@ -53,6 +53,41 @@ ALLOWED_TAGS="Project,Customer" npm run build:mockoon
 npx mockoon-cli start -d mockoon_envs/mockoon-env-patched.json
 ```
 
+## Reusable GitHub workflow template
+
+This repository includes a reusable workflow that mirrors the same 8-step sequence from `build-mockoon-env.sh`:
+
+- `.github/workflows/build-mockoon-env-reusable.yml`
+
+Use it from another repository workflow via `workflow_call`:
+
+```yaml
+name: Build Mockoon Env
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-mockoon:
+    uses: <owner>/<repo>/.github/workflows/build-mockoon-env-reusable.yml@main
+    with:
+      openapi_url: https://api.mittwald.de/v2/openapi.json
+      allowed_tags: Project,Customer
+      essential_tags: User
+      openapi_dir: openapi_prepared
+      overlays_dir: overlays
+      mockoon_dir: mockoon_envs
+      node_version: "22"
+      upload_artifact: true
+      artifact_name: mockoon-env-patched
+```
+
+Notes:
+
+- The caller repository must contain this toolchain project structure (`scripts/`, `package.json`, overlays/openapi directories, etc.), because the reusable workflow executes the same local commands.
+- The workflow output `mockoon_env_patched` contains the relative path to the generated patched environment file.
+- By default, generated files are uploaded as an artifact.
+
 ## Links!
 
 - [mockoon](https://github.com/mockoon/mockoon)
