@@ -4,6 +4,8 @@ Node/TypeScript-only pipeline to build a working Mockoon environment from raw Op
 
 ## What it does
 
+**tl;dr:** Starting from original JSON API specs, rework with strict overlay application, avoid patching JSON by hand
+
 1. Downloads OpenAPI JSON.
 2. Generates overlay to remove deprecated operations (and optionally non-matching tags).
 3. Applies filter overlay using bump-cli.
@@ -50,3 +52,8 @@ ALLOWED_TAGS="Project,Customer" npm run build:mockoon
 ```bash
 npx mockoon-cli start -d mockoon_envs/mockoon-env-patched.json
 ```
+
+## Links!
+
+- [mockoon](https://github.com/mockoon/mockoon)
+- [bump-cli](https://github.com/bump-sh/cli)
