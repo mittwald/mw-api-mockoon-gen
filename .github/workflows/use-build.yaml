@@ -14,3 +14,56 @@ jobs:
       node_version: "24"
       upload_artifact: true
       artifact_name: mockoon-env-patched
+
+  test-mockoon:
+    name: Start Mockoon and test endpoint
+    runs-on: ubuntu-latest
+    needs: build-mockoon
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download patched Mockoon artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mockoon-env-patched
+          path: mockoon_envs
+
+      - name: Start Mockoon and run curl test
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ENV_FILE=$(find mockoon_envs -type f -name 'mockoon-env-patched.json' | head -n 1)
+          test -n "$ENV_FILE"
+
+          MOCKOON_PID=""
+          cleanup() {
+            if [ -n "$MOCKOON_PID" ]; then
+              kill "$MOCKOON_PID" || true
+            fi
+          }
+          trap cleanup EXIT
+
+          npx --yes mockoon-cli start -d "$ENV_FILE" -p 3000 > mockoon.log 2>&1 &
+          MOCKOON_PID=$!
+
+          for i in {1..30}; do
+            if curl -sS -o /dev/null http://127.0.0.1:3000/; then
+              break
+            fi
+            sleep 1
+          done
+
+          status_code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:3000/v2/customers/test/ai-hosting-models/actions/accept-terms)
+          echo "Received status: ${status_code}"
+          test "$status_code" = "204"
