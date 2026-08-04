@@ -64,6 +64,29 @@ jobs:
             sleep 1
           done
 
-          status_code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:3000/v2/customers/test/ai-hosting-models/actions/accept-terms)
+          API_URL="http://127.0.0.1:3000/v2/project-memberships?hasExpiry=true&isInherited=true&role=notset&limit=50&page=1"
+
+          status_code=$(curl -sS -D response.headers -o response.json -w "%{http_code}" "$API_URL")
           echo "Received status: ${status_code}"
-          test "$status_code" = "204"
+          test "$status_code" = "200"
+
+          grep -qi '^content-type: application/json' response.headers
+
+          node -e '
+            const fs = require("node:fs");
+            const data = JSON.parse(fs.readFileSync("response.json", "utf8"));
+            if (!Array.isArray(data)) {
+              console.error("Response is not a JSON array");
+              process.exit(1);
+            }
+
+            if (data.length > 0) {
+              const required = ["id", "userId", "projectId", "role", "mfa", "inherited", "firstName", "lastName", "email"];
+              for (const key of required) {
+                if (!(key in data[0])) {
+                  console.error(`Missing required key in first item: ${key}`);
+                  process.exit(1);
+                }
+              }
+            }
+          '
