@@ -14,6 +14,7 @@ Node/TypeScript-only pipeline to build a working Mockoon environment from raw Op
 6. Dereferences the resulting OpenAPI using swagger-cli.
 7. Imports into Mockoon.
 8. Patches known Mockoon templating quirks in generated response bodies.
+   ( check! upstream patches should be in place by now! )
 
 ## Requirements
 
