@@ -1,0 +1,16 @@
+name: Build Mockoon Env
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-mockoon:
+    uses: gandie/mw-api-mockoon-gen/.github/workflows/build-mockoon-env-reusable.yml@master
+    with:
+      openapi_url: https://api.mittwald.de/v2/openapi.json
+      openapi_dir: openapi_prepared
+      overlays_dir: overlays
+      mockoon_dir: mockoon_envs
+      node_version: "22"
+      upload_artifact: true
+      artifact_name: mockoon-env-patched
