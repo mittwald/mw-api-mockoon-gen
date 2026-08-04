@@ -158,7 +158,7 @@ jobs:
 
       - name: Upload patched Mockoon environment
         if: ${{ inputs.upload_artifact }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.artifact_name }}
           path: |
