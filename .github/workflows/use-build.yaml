@@ -11,6 +11,6 @@ jobs:
       openapi_dir: openapi_prepared
       overlays_dir: overlays
       mockoon_dir: mockoon_envs
-      node_version: "22"
+      node_version: "24"
       upload_artifact: true
       artifact_name: mockoon-env-patched
