@@ -1,4 +1,4 @@
-# mockoon-toolchain-ts
+# mw-api-mockoon-gen
 
 Node/TypeScript-only pipeline to build a working Mockoon environment from raw OpenAPI.
 
