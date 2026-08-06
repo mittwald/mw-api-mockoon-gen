@@ -7,6 +7,7 @@
     "build:mockoon": "bash ./build-mockoon-env.sh",
     "gen:filter-overlay": "tsx ./scripts/generate-filter-overlay.ts",
     "gen:unroll-overlay": "tsx ./scripts/generate-unroll-overlay.ts",
+    "gen:internalversion-overlay": "tsx ./scripts/generate-internalversion-example-overlay.ts",
     "patch:mockoon": "tsx ./scripts/patch-mockoon-env.ts"
   },
   "devDependencies": {

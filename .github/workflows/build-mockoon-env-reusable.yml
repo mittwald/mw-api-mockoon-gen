@@ -95,6 +95,8 @@ jobs:
           echo "filtered_spec=${OPENAPI_DIR}/openapi.filtered.json" >> "$GITHUB_OUTPUT"
           echo "unroll_overlay=${OVERLAYS_DIR}/unroll_recursion.overlay.json" >> "$GITHUB_OUTPUT"
           echo "unrolled_spec=${OPENAPI_DIR}/openapi.unrolled.json" >> "$GITHUB_OUTPUT"
+          echo "internalversion_overlay=${OVERLAYS_DIR}/internalversion_example.overlay.json" >> "$GITHUB_OUTPUT"
+          echo "exampled_spec=${OPENAPI_DIR}/openapi.exampled.json" >> "$GITHUB_OUTPUT"
           echo "deref_spec=${OPENAPI_DIR}/openapi.deref.json" >> "$GITHUB_OUTPUT"
           echo "mockoon_env_raw=${MOCKOON_DIR}/mockoon_env.json" >> "$GITHUB_OUTPUT"
           echo "mockoon_env_patched=${MOCKOON_DIR}/mockoon-env-patched.json" >> "$GITHUB_OUTPUT"
@@ -105,13 +107,13 @@ jobs:
           set -euo pipefail
           mkdir -p "$OPENAPI_DIR" "$OVERLAYS_DIR" "$MOCKOON_DIR"
 
-      - name: 1/8 Fetch OpenAPI
+      - name: 1/10 Fetch OpenAPI
         shell: bash
         run: |
           set -euo pipefail
           curl --location --fail --silent "$OPENAPI_URL" > "${{ steps.paths.outputs.raw_spec }}"
 
-      - name: 2/8 Generate filter overlay
+      - name: 2/10 Generate filter overlay
         shell: bash
         run: |
           set -euo pipefail
@@ -119,13 +121,13 @@ jobs:
             --input "${{ steps.paths.outputs.raw_spec }}" \
             --output "${{ steps.paths.outputs.filter_overlay }}"
 
-      - name: 3/8 Apply filter overlay
+      - name: 3/10 Apply filter overlay
         shell: bash
         run: |
           set -euo pipefail
           npx bump overlay "${{ steps.paths.outputs.raw_spec }}" "${{ steps.paths.outputs.filter_overlay }}" > "${{ steps.paths.outputs.filtered_spec }}"
 
-      - name: 4/8 Generate recursion unroll overlay
+      - name: 4/10 Generate recursion unroll overlay
         shell: bash
         run: |
           set -euo pipefail
@@ -134,25 +136,40 @@ jobs:
             --output "${{ steps.paths.outputs.unroll_overlay }}" \
             --title "Unroll Recursion Overlay"
 
-      - name: 5/8 Apply recursion overlay
+      - name: 5/10 Apply recursion overlay
         shell: bash
         run: |
           set -euo pipefail
           npx bump overlay "${{ steps.paths.outputs.filtered_spec }}" "${{ steps.paths.outputs.unroll_overlay }}" > "${{ steps.paths.outputs.unrolled_spec }}"
 
-      - name: 6/8 Dereference OpenAPI
+      - name: 6/10 Generate internalversion example overlay
         shell: bash
         run: |
           set -euo pipefail
-          npx swagger-cli bundle "${{ steps.paths.outputs.unrolled_spec }}" --outfile "${{ steps.paths.outputs.deref_spec }}" --dereference
+          npx tsx ./scripts/generate-internalversion-example-overlay.ts \
+            --input "${{ steps.paths.outputs.unrolled_spec }}" \
+            --output "${{ steps.paths.outputs.internalversion_overlay }}" \
+            --title "Add internalversion examples"
 
-      - name: 7/8 Import into Mockoon
+      - name: 7/10 Apply internalversion example overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx bump overlay "${{ steps.paths.outputs.unrolled_spec }}" "${{ steps.paths.outputs.internalversion_overlay }}" > "${{ steps.paths.outputs.exampled_spec }}"
+
+      - name: 8/10 Dereference OpenAPI
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx swagger-cli bundle "${{ steps.paths.outputs.exampled_spec }}" --outfile "${{ steps.paths.outputs.deref_spec }}" --dereference
+
+      - name: 9/10 Import into Mockoon
         shell: bash
         run: |
           set -euo pipefail
           npx mockoon-cli import --input "${{ steps.paths.outputs.deref_spec }}" --output "${{ steps.paths.outputs.mockoon_env_raw }}" --prettify
 
-      - name: 8/8 Patch Mockoon template quirks
+      - name: 10/10 Patch Mockoon template quirks
         shell: bash
         run: |
           set -euo pipefail
@@ -167,7 +184,9 @@ jobs:
             ${{ steps.paths.outputs.mockoon_env_patched }}
             ${{ steps.paths.outputs.mockoon_env_raw }}
             ${{ steps.paths.outputs.deref_spec }}
+            ${{ steps.paths.outputs.exampled_spec }}
             ${{ steps.paths.outputs.unrolled_spec }}
             ${{ steps.paths.outputs.filtered_spec }}
+            ${{ steps.paths.outputs.internalversion_overlay }}
             ${{ steps.paths.outputs.filter_overlay }}
             ${{ steps.paths.outputs.unroll_overlay }}

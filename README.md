@@ -11,9 +11,11 @@ Node/TypeScript-only pipeline to build a working Mockoon environment from raw Op
 3. Applies filter overlay using bump-cli.
 4. Generates recursion-unroll overlay for self-referencing schemas.
 5. Applies unroll overlay.
-6. Dereferences the resulting OpenAPI using swagger-cli.
-7. Imports into Mockoon.
-8. Patches known Mockoon templating quirks in generated response bodies.
+6. Generates internalversion-example overlay (adds `example: "1.0.0"` to fields named `internalversion`).
+7. Applies internalversion-example overlay.
+8. Dereferences the resulting OpenAPI using swagger-cli.
+9. Imports into Mockoon.
+10. Patches known Mockoon templating quirks in generated response bodies.
    ( check! upstream patches should be in place by now! )
 
 ## Requirements
@@ -56,7 +58,7 @@ npx mockoon-cli start -d mockoon_envs/mockoon-env-patched.json
 
 ## Reusable GitHub workflow template
 
-This repository includes a reusable workflow that mirrors the same 8-step sequence from `build-mockoon-env.sh`:
+This repository includes a reusable workflow that mirrors the same 10-step sequence from `build-mockoon-env.sh`:
 
 - `.github/workflows/build-mockoon-env-reusable.yml`
 
