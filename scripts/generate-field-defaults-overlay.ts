@@ -37,7 +37,13 @@ const defaultPatchRules: DefaultPatchRule[] = [
     fieldName: "isdefault",
     defaultValue: true,
     description: "Help validators to work with mock data"
+  },
+  {
+    fieldName: "desired",
+    defaultValue: "00000000-0000-4000-8000-000000000000",
+    description: "Help api client! With this being undefined, api client cant handle path arguments correctly and might even call list endpoints!"
   }
+
 ];
 
 function main() {
