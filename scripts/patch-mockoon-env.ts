@@ -5,6 +5,7 @@ function getArg(flag: string): string {
   return idx >= 0 && idx + 1 < process.argv.length ? process.argv[idx + 1] : "";
 }
 
+// XXX: check if this is still needed.
 function patchString(value: string): string {
   let out = value;
 

@@ -12,8 +12,8 @@ FILTER_OVERLAY="${OVERLAYS_DIR}/filter_deprecated.overlay.json"
 FILTERED_SPEC="${OPENAPI_DIR}/openapi.filtered.json"
 UNROLL_OVERLAY="${OVERLAYS_DIR}/unroll_recursion.overlay.json"
 UNROLLED_SPEC="${OPENAPI_DIR}/openapi.unrolled.json"
-INTERNALVERSION_OVERLAY="${OVERLAYS_DIR}/internalversion_example.overlay.json"
-EXAMPLED_SPEC="${OPENAPI_DIR}/openapi.exampled.json"
+FIELD_DEFAULTS_OVERLAY="${OVERLAYS_DIR}/field_defaults.overlay.json"
+DEFAULTED_SPEC="${OPENAPI_DIR}/openapi.defaulted.json"
 DEREF_SPEC="${OPENAPI_DIR}/openapi.deref.json"
 MOCKOON_ENV_RAW="${MOCKOON_DIR}/mockoon_env.json"
 MOCKOON_ENV_PATCHED="${MOCKOON_DIR}/mockoon-env-patched.json"
@@ -40,17 +40,17 @@ npx tsx ./scripts/generate-unroll-overlay.ts \
 echo "5/10 Apply recursion overlay"
 npx bump overlay "${FILTERED_SPEC}" "${UNROLL_OVERLAY}" > "${UNROLLED_SPEC}"
 
-echo "6/10 Generate internalversion example overlay"
-npx tsx ./scripts/generate-internalversion-example-overlay.ts \
+echo "6/10 Generate field defaults overlay"
+npx tsx ./scripts/generate-field-defaults-overlay.ts \
   --input "${UNROLLED_SPEC}" \
-  --output "${INTERNALVERSION_OVERLAY}" \
-  --title "Add internalversion examples"
+  --output "${FIELD_DEFAULTS_OVERLAY}" \
+  --title "Add field defaults"
 
-echo "7/10 Apply internalversion example overlay"
-npx bump overlay "${UNROLLED_SPEC}" "${INTERNALVERSION_OVERLAY}" > "${EXAMPLED_SPEC}"
+echo "7/10 Apply field defaults overlay"
+npx bump overlay "${UNROLLED_SPEC}" "${FIELD_DEFAULTS_OVERLAY}" > "${DEFAULTED_SPEC}"
 
 echo "8/10 Dereference OpenAPI"
-npx swagger-cli bundle "${EXAMPLED_SPEC}" --outfile "${DEREF_SPEC}" --dereference
+npx swagger-cli bundle "${DEFAULTED_SPEC}" --outfile "${DEREF_SPEC}" --dereference
 
 echo "9/10 Import into Mockoon"
 npx mockoon-cli import --input "${DEREF_SPEC}" --output "${MOCKOON_ENV_RAW}" --prettify

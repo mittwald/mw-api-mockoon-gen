@@ -11,8 +11,8 @@ Node/TypeScript-only pipeline to build a working Mockoon environment from raw Op
 3. Applies filter overlay using bump-cli.
 4. Generates recursion-unroll overlay for self-referencing schemas.
 5. Applies unroll overlay.
-6. Generates internalversion-example overlay (adds `example: "1.0.0"` to fields named `internalversion`).
-7. Applies internalversion-example overlay.
+6. Generates field-defaults overlay (starts by adding `default: "1.0.0"` to fields named `internalversion`, extensible via rule list).
+7. Applies field-defaults overlay.
 8. Dereferences the resulting OpenAPI using swagger-cli.
 9. Imports into Mockoon.
 10. Patches known Mockoon templating quirks in generated response bodies.
