@@ -42,8 +42,12 @@ const defaultPatchRules: DefaultPatchRule[] = [
     fieldName: "desired",
     defaultValue: "00000000-0000-4000-8000-000000000000",
     description: "Help api client! With this being undefined, api client cant handle path arguments correctly and might even call list endpoints!"
+  },
+  {
+    fieldName: "servicename",
+    defaultValue: "00000000-0000-4000-8000-000000000000",
+    description: "Help list services to return actionable data. Defaulting this field felt more sensible than touch id fields"
   }
-
 ];
 
 function main() {
@@ -83,7 +87,7 @@ function main() {
       if (matchedRule && isObject(value)) {
         const nextSchema: JsonObject = {
           ...value,
-          default: matchedRule.defaultValue
+          example: matchedRule.defaultValue
         };
 
         actions.push({
