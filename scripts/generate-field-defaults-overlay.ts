@@ -51,13 +51,18 @@ const defaultPatchRules: DefaultPatchRule[] = [
   {
     fieldName: "id",
     defaultValue: "00000000-0000-4000-8000-000000000000",
-    description: "ID fields missing format"
+    description: "ID fields missing format. Selector is much too broad though."
   },
   {
     fieldName: "name",
     defaultValue: "node",
-    description: "Name field example for app installations"
-  }
+    description: "Name field example for app installations. Selector is much too broad though."
+  },
+  {
+    fieldName: "mainUser",
+    defaultValue: true,
+    description: "Pin main user to true for mock data. Database stuff. Collides with deletion."
+  },
 ];
 
 function main() {
