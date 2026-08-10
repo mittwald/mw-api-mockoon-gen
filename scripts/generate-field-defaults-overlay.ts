@@ -47,6 +47,16 @@ const defaultPatchRules: DefaultPatchRule[] = [
     fieldName: "servicename",
     defaultValue: "00000000-0000-4000-8000-000000000000",
     description: "Help list services to return actionable data. Defaulting this field felt more sensible than touch id fields"
+  },
+  {
+    fieldName: "id",
+    defaultValue: "00000000-0000-4000-8000-000000000000",
+    description: "ID fields missing format"
+  },
+  {
+    fieldName: "name",
+    defaultValue: "node",
+    description: "Name field example for app installations"
   }
 ];
 
