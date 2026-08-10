@@ -63,6 +63,11 @@ const defaultPatchRules: DefaultPatchRule[] = [
     defaultValue: true,
     description: "Pin main user to true for mock data. Database stuff. Collides with deletion."
   },
+  {
+    fieldName: "downloadURL",
+    defaultValue: "https://example.com",
+    description: "Provide example download URL for backup download."
+  },
 ];
 
 function main() {
