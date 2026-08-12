@@ -8,10 +8,15 @@ type OverlayAction = {
   description: string;
 };
 
+type RuleSelector = {
+  pathExcludes?: string[];
+};
+
 type DefaultPatchRule = {
   fieldName: string;
   defaultValue: unknown;
   description: string;
+  selector?: RuleSelector;
 };
 
 function getArg(flag: string, fallback = ""): string {
@@ -68,7 +73,28 @@ const defaultPatchRules: DefaultPatchRule[] = [
     defaultValue: "https://example.com",
     description: "Provide example download URL for backup download."
   },
+  {
+    fieldName: "current",
+    defaultValue: "1.0.0",
+    description: "Provide example _current_ version. Excludes mail storage current values.",
+    selector: {
+      pathExcludes: ["storageInBytes"]
+    }
+  },
 ];
+
+function matchesRule(rule: DefaultPatchRule, key: string, keyPath: string): boolean {
+  if (key.toLowerCase() !== rule.fieldName.toLowerCase()) {
+    return false;
+  }
+
+  const excludedFragments = rule.selector?.pathExcludes ?? [];
+  if (excludedFragments.some((fragment) => keyPath.includes(fragment))) {
+    return false;
+  }
+
+  return true;
+}
 
 function main() {
   const input = getArg("--input");
@@ -101,7 +127,7 @@ function main() {
       const keyPath = `${path}${quoteJsonPathKey(key)}`;
 
       const matchedRule = defaultPatchRules.find(
-        (rule) => key.toLowerCase() === rule.fieldName.toLowerCase()
+        (rule) => matchesRule(rule, key, keyPath)
       );
 
       if (matchedRule && isObject(value)) {
