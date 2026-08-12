@@ -36,7 +36,12 @@ const defaultPatchRules: DefaultPatchRule[] = [
   {
     fieldName: "internalversion",
     defaultValue: "1.0.0",
-    description: "Help generator as no format is given for plain string"
+    description: "Help generator as no format is given for plain string versions"
+  },
+  {
+    fieldName: "externalversion",
+    defaultValue: "1.0.0",
+    description: "Help generator as no format is given for plain string versions"
   },
   {
     fieldName: "isdefault",
