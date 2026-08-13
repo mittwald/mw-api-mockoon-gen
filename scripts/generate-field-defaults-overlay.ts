@@ -79,6 +79,11 @@ const defaultPatchRules: DefaultPatchRule[] = [
     description: "Provide example download URL for backup download."
   },
   {
+    fieldName: "domain",
+    defaultValue: "example.com",
+    description: "Provide example domain for dns zone."
+  },
+  {
     fieldName: "current",
     defaultValue: "1.0.0",
     description: "Provide example _current_ version. Excludes mail storage current values.",
