@@ -59,6 +59,11 @@ const defaultPatchRules: DefaultPatchRule[] = [
     description: "Help list services to return actionable data. Defaulting this field felt more sensible than touch id fields"
   },
   {
+    fieldName: "customerid",
+    defaultValue: "00000000-0000-4000-8000-000000000000",
+    description: "Probably is an organization?!"
+  },
+  {
     fieldName: "id",
     defaultValue: "00000000-0000-4000-8000-000000000000",
     description: "ID fields missing format. Selector is much too broad though."
@@ -67,6 +72,11 @@ const defaultPatchRules: DefaultPatchRule[] = [
     fieldName: "name",
     defaultValue: "node",
     description: "Name field example for app installations. Selector is much too broad though."
+  },
+  {
+    fieldName: "number",
+    defaultValue: "8.4",
+    description: "Actually a _version_ number!?"
   },
   {
     fieldName: "mainUser",
@@ -82,6 +92,11 @@ const defaultPatchRules: DefaultPatchRule[] = [
     fieldName: "domain",
     defaultValue: "example.com",
     description: "Provide example domain for dns zone."
+  },
+  {
+    fieldName: "address",
+    defaultValue: "integration@example.com",
+    description: "Provide example mail address."
   },
   {
     fieldName: "current",
